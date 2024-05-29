@@ -12,23 +12,23 @@ import {
     ArcElement,
 } from 'chart.js';
 
-import { troopData, TroopLevel, TroopType } from '../utils/troop';
-import TroopInputSlider from './TroopInput';
+import { Troop, troopData, TroopLevel, TroopType } from '../utils/troop';
+import { TroopLevelSelect, TroopInputSlider } from './TroopInput';
+import { OutputValue, TroopRSSOutputTable } from './TroopOutput';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
+interface TroopTypes {
+    infantry: number;
+    lancer: number;
+    marksman: number;
+}
 
 const TroopCalculator: React.FC = () => {
     const [inputValue, setInputValue] = useState<string>('');
     const [troopLevel, setTroopLevel] = useState<TroopLevel>(TroopLevel.T1);
+    const [troopTypes, setTroopTypes] = useState<TroopTypes>({ infantry: 34, lancer: 33, marksman: 33 });
 
-    type OutputValue = {
-        meat: number;
-        wood: number;
-        coal: number;
-        iron: number;
-        time: string;
-    };
     const [outputValue, setOutputValue] = useState<OutputValue>({
         meat: 0,
         wood: 0,
@@ -41,9 +41,7 @@ const TroopCalculator: React.FC = () => {
         recalculate();
     }, [inputValue, troopLevel]);
 
-    const handleLevelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setTroopLevel(event.target.value as TroopLevel);
-    };
+    const handleLevelChange = setTroopLevel;
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const amount = parseInt(event.target.value);
@@ -62,26 +60,47 @@ const TroopCalculator: React.FC = () => {
             return;
         }
 
-        const troop = troopData.find(t => t.level === troopLevel && t.type === TroopType.Infantry);
-        if (!troop) {
+        const troopsOpt = [
+            troopData.find(t => t.level === troopLevel && t.type === TroopType.Infantry),
+            troopData.find(t => t.level === troopLevel && t.type === TroopType.Lancer),
+            troopData.find(t => t.level === troopLevel && t.type === TroopType.Marksman),
+        ]
+
+        if (troopsOpt.some(t => !t)) {
+            setOutputValue({ meat: 0, wood: 0, coal: 0, iron: 0, time: '0d 0h 0m' });
             return;
         }
+        const troops = troopsOpt as Troop[];
 
-        const cost = troop.cost;
-        const totalTime = troop.time * amount;
-        const days = Math.floor(totalTime / 24);
-        const hours = Math.floor(totalTime % 24);
-        const minutes = Math.floor((totalTime % 1) * 60);
-        const timeString = `${days}d ${hours}h ${minutes}m`;
+        const troopAmounts = [
+            Math.ceil(amount * troopTypes.infantry / 100),
+            Math.ceil(amount * troopTypes.lancer / 100),
+            Math.ceil(amount * troopTypes.marksman / 100),
+        ];
+
+        const troop = troops.reduce((acc, troop, i) => {
+            acc.cost.meat += troop.cost.meat * troopAmounts[i];
+            acc.cost.wood += troop.cost.wood * troopAmounts[i];
+            acc.cost.coal += troop.cost.coal * troopAmounts[i];
+            acc.cost.iron += troop.cost.iron * troopAmounts[i];
+            acc.time += troop.time * troopAmounts[i];
+            return acc;
+        }, { cost: { meat: 0, wood: 0, coal: 0, iron: 0 }, time: 0 });
+
+        const minutes = Math.floor(troop.time / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        const timeString = `${days}d ${hours % 24}h ${minutes % 60}m`;
 
         setOutputValue({
-            meat: cost.meat * amount,
-            wood: cost.wood * amount,
-            coal: cost.coal * amount,
-            iron: cost.iron * amount,
+            meat: troop.cost.meat,
+            wood: troop.cost.wood,
+            coal: troop.cost.coal,
+            iron: troop.cost.iron,
             time: timeString,
         });
-    };
+    }
     return (
         <div className="space-y-4">
             <div className="flex flex-col">
@@ -95,53 +114,15 @@ const TroopCalculator: React.FC = () => {
                     placeholder="Enter number of troops to train"
                 />
             </div>
-            <div className="flex flex-col">
-                <label htmlFor="troop-type" className="mb-2 font-medium">Troop Type:</label>
-                <select value={troopLevel} onChange={handleLevelChange} className="p-2 border rounded bg-black">
-                    <option value={TroopLevel.T1}>Tier 1</option>
-                    <option value={TroopLevel.T2}>Tier 2</option>
-                    <option value={TroopLevel.T3}>Tier 3</option>
-                    <option value={TroopLevel.T4}>Tier 4</option>
-                    <option value={TroopLevel.T5}>Tier 5</option>
-                    <option value={TroopLevel.T6}>Tier 6</option>
-                    <option value={TroopLevel.T7}>Tier 7</option>
-                    <option value={TroopLevel.T8}>Tier 8</option>
-                    <option value={TroopLevel.T9}>Tier 9</option>
-                    <option value={TroopLevel.T10}>Tier 10</option>
-                </select>
+            <TroopLevelSelect label="Troop Level" value={troopLevel} onChange={handleLevelChange} />
+            <div className="flex justify-center">
+                <TroopInputSlider label="Infantry" value={troopTypes.infantry} max={100 - troopTypes.lancer - troopTypes.marksman} onChange={value => setTroopTypes({ ...troopTypes, infantry: value })} />
+                <TroopInputSlider label="Lancer" value={troopTypes.lancer} max={100 - troopTypes.infantry - troopTypes.marksman} onChange={value => setTroopTypes({ ...troopTypes, lancer: value })} />
+                <TroopInputSlider label="Marksman" value={troopTypes.marksman} max={100 - troopTypes.infantry - troopTypes.lancer} onChange={value => setTroopTypes({ ...troopTypes, marksman: value })} />
             </div>
+
             <div className="flex flex-col">
-                <label className="mb-2 font-medium">Data Table:</label>
-                <table className="min-w-full border border-gray-200">
-                    <thead className="bg-gray-600">
-                        <tr>
-                            <th className="px-4 py-2 border"></th>
-                            <th className="px-4 py-2 border">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td className="px-4 py-2 border">Meat</td>
-                            <td className="px-4 py-2 border">{outputValue.meat}</td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-2 border">Wood</td>
-                            <td className="px-4 py-2 border">{outputValue.wood}</td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-2 border">Coal</td>
-                            <td className="px-4 py-2 border">{outputValue.coal}</td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-2 border">Iron</td>
-                            <td className="px-4 py-2 border">{outputValue.iron}</td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-2 border">Time</td>
-                            <td className="px-4 py-2 border">{outputValue.time}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <TroopRSSOutputTable value={outputValue} />
 
                 <h2 className="mt-8 text-4xl font-medium">Graphs:</h2>
 
@@ -157,18 +138,7 @@ const TroopCalculator: React.FC = () => {
                                 },
                             ],
                         }}
-                        options={{
-                            plugins: {
-                                legend: {
-                                    display: true,
-                                    position: 'right',
-                                },
-                            },
-                        }}
                     />
-                </div>
-                <div className="flex flex-col">
-                    <label className="mt-2 font-medium">Troop Ratios:</label>
                 </div>
 
             </div>
