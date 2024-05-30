@@ -1,14 +1,13 @@
 import React from 'react';
-import ReactSlider from 'react-slider'
 
 import { TroopLevel } from '../utils/troop';
-
-import "../styles/slider.css"
+import "../styles/troop.css";
 
 interface TroopLevelProps {
-    label: string;
+    label: string | undefined;
     value: TroopLevel;
     onChange: (value: TroopLevel) => void;
+    className?: string;
 }
 
 interface TroopInputProps {
@@ -18,9 +17,9 @@ interface TroopInputProps {
     onChange: (value: number) => void;
 }
 
-const TroopLevelSelect: React.FC<TroopLevelProps> = ({ label, value, onChange }) => {
-    return (<div className="flex flex-col">
-        <label htmlFor="troop-type" className="mb-2 font-medium">{label}</label>
+const TroopLevelSelect: React.FC<TroopLevelProps> = ({ label, value, onChange, className }) => {
+    return (<div className={`troop-level-select ${className}`}>
+        {label && <label htmlFor="troop-type" className="mb-2 font-medium">{label}</label>}
         <select value={value} onChange={e => onChange(e.target.value as TroopLevel)} className="p-2 border rounded bg-black">
             <option value={TroopLevel.T1}>Tier 1</option>
             <option value={TroopLevel.T2}>Tier 2</option>
@@ -37,6 +36,118 @@ const TroopLevelSelect: React.FC<TroopLevelProps> = ({ label, value, onChange })
     );
 }
 
+interface TroopUpgrade {
+    from: TroopLevel;
+    maxInfantry: string;
+    maxLancer: string;
+    maxMarksman: string;
+}
+
+interface TroopLevelInfo {
+    troopLevel: TroopLevel;
+    upgradeLevel: TroopUpgrade[];
+}
+
+interface TroopLevelManagerProps {
+    info: TroopLevelInfo;
+    onChange: (info: TroopLevelInfo) => void;
+}
+const TroopLevelManager: React.FC<TroopLevelManagerProps> = ({ info, onChange }) => {
+    const addUpgrade = () => {
+        const newUpgrade = [...info.upgradeLevel, { from: TroopLevel.T1, maxInfantry: '0', maxLancer: '0', maxMarksman: '0' }];
+        onChange({ ...info, upgradeLevel: newUpgrade });
+    };
+
+    const removeUpgrade = (index: number) => {
+        const newUpgrade = info.upgradeLevel.filter((_, i) => i !== index);
+        if (newUpgrade.length === 0) {
+            onChange({ ...info, upgradeLevel: newUpgrade });
+            return;
+        }
+        onChange({ ...info, upgradeLevel: newUpgrade });
+    }
+
+    const handleUpgradeLevelLevelChange = (index: number, value: TroopLevel) => {
+        const newUpgrade = info.upgradeLevel.map((upgrade, i) => {
+            if (i !== index) return { ...upgrade };
+            return { ...upgrade, from: value };
+        });
+        onChange({ ...info, upgradeLevel: newUpgrade });
+    }
+    const handleUpgradeLevelChangeInfantry = (index: number, value: string) => {
+        const newUpgrade = info.upgradeLevel.map((upgrade, i) => {
+            if (i !== index) return { ...upgrade };
+            return { ...upgrade, maxInfantry: value };
+        });
+        onChange({ ...info, upgradeLevel: newUpgrade });
+    };
+    const handleUpgradeLevelChangeLancer = (index: number, value: string) => {
+        const newUpgrade = info.upgradeLevel.map((upgrade, i) => {
+            if (i !== index) return { ...upgrade };
+            return { ...upgrade, maxLancer: value };
+        });
+        onChange({ ...info, upgradeLevel: newUpgrade });
+    };
+    const handleUpgradeLevelChangeMarksman = (index: number, value: string) => {
+        const newUpgrade = info.upgradeLevel.map((upgrade, i) => {
+            if (i !== index) return { ...upgrade };
+            return { ...upgrade, maxMarksman: value };
+        });
+
+        onChange({ ...info, upgradeLevel: newUpgrade });
+    };
+
+    return (
+        <div className="flex flex-col">
+            <TroopLevelSelect
+                label="Target Troop Level:"
+                value={info.troopLevel}
+                onChange={value => onChange({ ...info, troopLevel: value })}
+                className="mb-4"
+            />
+            {info.upgradeLevel.length !== 0 &&
+                <div className="upgrade-levels">
+                    <h2 className="text-xl">Upgrade Levels:</h2>
+                    {info.upgradeLevel.map((upgrade, index) => (
+                        <div key={index} className="upgrade-item bg-gray-800 rounded">
+                            <span className="cursor-pointer justify-self-start font-bold text-red-600 p-2" onClick={() => removeUpgrade(index)}>Remove</span>
+                            <div /> {/* Spacer */}
+                            <label htmlFor="upgrade-from" className="font-medium text-center content-center">Upgrade From:</label>
+                            <TroopLevelSelect
+                                key={index}
+                                label={undefined}
+                                value={upgrade.from}
+                                onChange={value => handleUpgradeLevelLevelChange(index, value)}
+                                className="ml-2 mb-2 flex-grow flex flex-col"
+                            />
+                            <label htmlFor="upgrade-max" className="font-medium text-center content-center">Infantry:</label>
+                            <input
+                                type="text"
+                                className="p-2 border rounded bg-black"
+                                value={upgrade.maxInfantry}
+                                onChange={e => handleUpgradeLevelChangeInfantry(index, e.target.value)}
+                            />
+                            <label htmlFor="upgrade-max" className="font-medium text-center content-center">Lancer:</label>
+                            <input
+                                type="text"
+                                className="p-2 border rounded bg-black"
+                                value={upgrade.maxLancer}
+                                onChange={e => handleUpgradeLevelChangeLancer(index, e.target.value)}
+                            />
+                            <label htmlFor="upgrade-max" className="font-medium text-center content-center">Marksman:</label>
+                            <input
+                                type="text"
+                                className="p-2 border rounded bg-black"
+                                value={upgrade.maxMarksman}
+                                onChange={e => handleUpgradeLevelChangeMarksman(index, e.target.value)}
+                            />
+                        </div>
+                    ))}
+                </div>
+            }
+            <button onClick={addUpgrade} className="p-2 mt-4 border rounded bg-black">Add Upgrade</button>
+        </div>)
+}
 
 const TroopInputSlider: React.FC<TroopInputProps> = ({ label, value, max, onChange }) => {
     const onSliderInput = (e: any) => {
@@ -54,6 +165,7 @@ const TroopInputSlider: React.FC<TroopInputProps> = ({ label, value, max, onChan
 };
 
 enum InputType {
+    UpgradeAll = "UpgradeAll",
     TroopAmount = "TroopAmount",
     HoCPoints = "HoCPoints",
 };
@@ -66,32 +178,39 @@ interface InputManagerProps {
 const InputManager: React.FC<InputManagerProps> = ({ type, value, onChange }) => {
     const inputLabels = () => {
         switch (type) {
+            case InputType.UpgradeAll:
             case InputType.TroopAmount:
-                return [ "Number of troops:", "100K" ];
+                return ["Number of troops:", "100K"];
             case InputType.HoCPoints:
-                return [ "HoC Points:", "100M" ];
+                return ["HoC Points:", "100M"];
         }
     }
     return (
         <div className="flex flex-col">
             <label htmlFor="input-type" className="mb-2 font-medium">Input Type:</label>
-            <select value={type} onChange={e => onChange(e.target.value as InputType, value) } className="p-2 border rounded bg-black">
+            <select value={type} onChange={e => onChange(e.target.value as InputType, value)} className="p-2 border rounded bg-black">
                 <option value={InputType.TroopAmount}>Troop Amount</option>
                 <option value={InputType.HoCPoints}>HoC Points</option>
+                <option value={InputType.UpgradeAll}>Upgrade All</option>
             </select>
 
-            <label htmlFor="input-value" className="mb-2 font-medium">{inputLabels()[0]}</label>
-            <input
-                id="input-value"
-                type="text"
-                value={value}
-                onChange={e => onChange(type, e.target.value)}
-                className="p-2 border rounded bg-black"
-                placeholder={"Enter value, example: " + inputLabels()[1]}
-            />
+            {type !== InputType.UpgradeAll &&
+                <label htmlFor="input-value" className="mb-2 font-medium">{inputLabels()[0]}</label>
+            }
+            {type !== InputType.UpgradeAll &&
+                <input
+                    id="input-value"
+                    type="text"
+                    value={value}
+                    onChange={e => onChange(type, e.target.value)}
+                    className="p-2 border rounded bg-black"
+                    placeholder={"Enter value, example: " + inputLabels()[1]}
+                />
+            }
 
         </div>
     );
 };
 
-export { TroopLevelSelect, TroopInputSlider, InputManager, InputType };
+export type { TroopUpgrade, TroopLevelInfo };
+export { TroopLevelManager, TroopLevelSelect, TroopInputSlider, InputManager, InputType };

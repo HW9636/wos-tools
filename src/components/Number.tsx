@@ -1,7 +1,6 @@
 import React from 'react';
 
 const parseReadableNumber = (value: string): number => {
-    console.log("ParseNumber: ", value);
     let suffix = 1;
     if (value.endsWith('K') || value.endsWith('k')) {
         suffix = 1e3;

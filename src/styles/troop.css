@@ -1,0 +1,16 @@
+.troop-level-select {
+    display: grid;
+    align-items: center;
+}
+
+.upgrade-levels {
+    display: grid;
+    gap: 1rem;
+}
+
+.upgrade-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: .25rem;
+    align-items: center;
+}
