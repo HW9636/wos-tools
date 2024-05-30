@@ -77,6 +77,8 @@ interface TroopRatios {
     lancer: number;
     marksman: number;
 }
+
+const troopTypes: TroopType[] = [TroopType.Infantry, TroopType.Lancer, TroopType.Marksman];
 type TroopAmount = [number, number, number];
 
 const calculateRatio = (amount: number, ratios: TroopRatios): number[] => {
@@ -97,7 +99,7 @@ const calculateRatio = (amount: number, ratios: TroopRatios): number[] => {
             return remaining;
         }
 
-        const troopAmount = Math.min(Math.ceil(amount * getTroopAmount(troopData[i].type) / 100), remaining);
+        const troopAmount = Math.min(Math.ceil(amount * getTroopAmount(troopTypes[i]) / 100), remaining);
         remaining -= troopAmount;
         return troopAmount;
     });
