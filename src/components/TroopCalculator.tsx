@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { Troop, TroopRatios, troopData, TroopLevel, TroopType, calculateTroopDifference, getTroopsForLevel, TroopCalculatorHelper } from '../utils/troop';
-import { TroopLevelManager, TroopLevelInfo, TroopLevelSelect, TroopInputSlider, InputManager, InputType } from './TroopInput';
+import { TroopRatios, TroopLevel, TroopCalculatorHelper } from '../utils/troop';
+import { TroopLevelManager, TroopLevelInfo, TroopInputSlider, InputManager, InputType } from './TroopInput';
 import { OutputValue, TroopRSSOutputTable, TroopOutputGraphs } from './TroopOutput';
 import { parseReadableNumber } from './Number';
 
@@ -26,19 +26,19 @@ const TroopCalculator: React.FC = () => {
     });
 
     useEffect(() => {
-        const upgradeLevels = inputInfo.upgradeLevel.map(upgrade => ({...upgrade}));
+        const upgradeLevels = inputInfo.upgradeLevel.map(upgrade => ({ ...upgrade }));
         let speed = 0;
         if (trainingSpeed.endsWith('%'))
             speed = parseFloat(trainingSpeed.slice(0, -1)) / 100;
         else
             speed = parseFloat(trainingSpeed);
         if (isNaN(speed)) speed = 0;
-            
+
         const calculator = new TroopCalculatorHelper(inputInfo.troopLevel, speed, upgradeLevels)
         switch (inputType) {
             case InputType.TroopAmount:
                 calculator.TargetAmount(parseReadableNumber(inputValue), troopRatios)
-                break;    
+                break;
             case InputType.HoCPoints:
                 calculator.TargetHoCPoints(parseReadableNumber(inputValue), troopRatios)
                 break;
@@ -66,11 +66,11 @@ const TroopCalculator: React.FC = () => {
             <InputManager type={inputType} value={inputValue} onChange={handleInputChange} />
             <TroopLevelManager info={inputInfo} onChange={handleLevelChange} />
             {inputType !== InputType.UpgradeAll &&
-            <div className="flex justify-center flex-col lg:flex-row">
-                <TroopInputSlider label="Infantry" value={troopRatios.infantry} max={100 - troopRatios.lancer - troopRatios.marksman} onChange={value => setTroopTypes({ ...troopRatios, infantry: value })} />
-                <TroopInputSlider label="Lancer" value={troopRatios.lancer} max={100 - troopRatios.infantry - troopRatios.marksman} onChange={value => setTroopTypes({ ...troopRatios, lancer: value })} />
-                <TroopInputSlider label="Marksman" value={troopRatios.marksman} max={100 - troopRatios.infantry - troopRatios.lancer} onChange={value => setTroopTypes({ ...troopRatios, marksman: value })} />
-            </div>
+                <div className="flex justify-center flex-col lg:flex-row">
+                    <TroopInputSlider label="Infantry" value={troopRatios.infantry} max={100 - troopRatios.lancer - troopRatios.marksman} onChange={value => setTroopTypes({ ...troopRatios, infantry: value })} />
+                    <TroopInputSlider label="Lancer" value={troopRatios.lancer} max={100 - troopRatios.infantry - troopRatios.marksman} onChange={value => setTroopTypes({ ...troopRatios, lancer: value })} />
+                    <TroopInputSlider label="Marksman" value={troopRatios.marksman} max={100 - troopRatios.infantry - troopRatios.lancer} onChange={value => setTroopTypes({ ...troopRatios, marksman: value })} />
+                </div>
             }
             <div className="flex justify-center flex-col">
                 <label className="text-lg font-semibold">Training Speed Bonus:</label>
