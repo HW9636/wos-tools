@@ -1,6 +1,7 @@
 import { parseReadableNumber } from "@/components/Number";
 import { TroopUpgrade } from "@/components/TroopInput";
 import { OutputValue } from "@/components/TroopOutput";
+import { convertTimeToString } from "./time";
 
 enum TroopLevel {
     T1 = 'T1',
@@ -136,10 +137,12 @@ type CalculatorOutputStore = {
 class Calculator {
     private targetTroops: Troop[];
     private upgrades: TroopUpgrade[];
+    private trainingSpeed: number;
     private output: CalculatorOutputStore = { meat: 0, wood: 0, coal: 0, iron: 0, time: 0, infantry: 0, lancer: 0, marksman: 0 };
 
-    public constructor(targetLevel: TroopLevel, upgrades: TroopUpgrade[]) {
+    public constructor(targetLevel: TroopLevel, trainingSpeed: number, upgrades: TroopUpgrade[]) {
         this.targetTroops = getTroopsForLevel(targetLevel);
+        this.trainingSpeed = trainingSpeed;
         this.upgrades = upgrades;
     }
 
@@ -307,18 +310,14 @@ class Calculator {
     };
 
     public toOutput(): OutputValue {
-        const time = this.output.time;
-        const minutes = Math.ceil(time / 60) % 60;
-        const hours = Math.floor(time / 3600) % 24;
-        const days = Math.floor(time / 86400);
-        const timeStr = `${days}d ${hours}h ${minutes}m`;
 
         return {
             meat: this.output.meat,
             wood: this.output.wood,
             coal: this.output.coal,
             iron: this.output.iron,
-            time: timeStr,
+            rawTime: convertTimeToString(this.output.time),
+            time: convertTimeToString(this.output.time / (1 + this.trainingSpeed)),
             infantry: this.output.infantry,
             lancer: this.output.lancer,
             marksman: this.output.marksman,

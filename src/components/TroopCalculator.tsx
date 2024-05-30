@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { Troop, TroopRatios, troopData, TroopLevel, TroopType, calculateTroopDifference, getTroopsForLevel, TroopCalculatorHelper } from '../utils/troop';
 import { TroopLevelManager, TroopLevelInfo, TroopLevelSelect, TroopInputSlider, InputManager, InputType } from './TroopInput';
 import { OutputValue, TroopRSSOutputTable, TroopOutputGraphs } from './TroopOutput';
@@ -11,12 +11,14 @@ const TroopCalculator: React.FC = () => {
     const [inputInfo, setTroopLevel] = useState<TroopLevelInfo>({ troopLevel: TroopLevel.T1, upgradeLevel: [] });
     const [troopRatios, setTroopTypes] = useState<TroopRatios>({ infantry: 34, lancer: 33, marksman: 33 });
     const [inputType, setInputType] = useState<InputType>(InputType.TroopAmount);
+    const [trainingSpeed, setTrainingSpeed] = useState<string>('0%');
 
     const [outputValue, setOutputValue] = useState<OutputValue>({
         meat: 0,
         wood: 0,
         coal: 0,
         iron: 0,
+        rawTime: '0d 0h 0m',
         time: '0d 0h 0m',
         infantry: 0,
         lancer: 0,
@@ -25,7 +27,14 @@ const TroopCalculator: React.FC = () => {
 
     useEffect(() => {
         const upgradeLevels = inputInfo.upgradeLevel.map(upgrade => ({...upgrade}));
-        const calculator = new TroopCalculatorHelper(inputInfo.troopLevel, upgradeLevels);
+        let speed = 0;
+        if (trainingSpeed.endsWith('%'))
+            speed = parseFloat(trainingSpeed.slice(0, -1)) / 100;
+        else
+            speed = parseFloat(trainingSpeed);
+        if (isNaN(speed)) speed = 0;
+            
+        const calculator = new TroopCalculatorHelper(inputInfo.troopLevel, speed, upgradeLevels)
         switch (inputType) {
             case InputType.TroopAmount:
                 calculator.TargetAmount(parseReadableNumber(inputValue), troopRatios)
@@ -39,7 +48,7 @@ const TroopCalculator: React.FC = () => {
         };
 
         setOutputValue(calculator.toOutput());
-    }, [inputValue, inputInfo, troopRatios, inputType]);
+    }, [inputValue, inputInfo, troopRatios, inputType, trainingSpeed]);
 
     const handleLevelChange = (level: TroopLevelInfo) => {
         setTroopLevel(level);
@@ -47,6 +56,9 @@ const TroopCalculator: React.FC = () => {
     const handleInputChange = (type: InputType, value: string) => {
         setInputType(type);
         setInputValue(value);
+    }
+    const handleTrainingSpeedChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setTrainingSpeed(event.target.value);
     }
 
     return (
@@ -60,6 +72,10 @@ const TroopCalculator: React.FC = () => {
                 <TroopInputSlider label="Marksman" value={troopRatios.marksman} max={100 - troopRatios.infantry - troopRatios.lancer} onChange={value => setTroopTypes({ ...troopRatios, marksman: value })} />
             </div>
             }
+            <div className="flex justify-center flex-col">
+                <label className="text-lg font-semibold">Training Speed Bonus:</label>
+                <input type="text" className="p-2 border rounded bg-black" value={trainingSpeed} onChange={handleTrainingSpeedChange} />
+            </div>
 
             <TroopRSSOutputTable value={outputValue} />
             <TroopOutputGraphs value={outputValue} />
