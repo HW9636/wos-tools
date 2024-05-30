@@ -13,8 +13,9 @@ import {
 } from 'chart.js';
 
 import { Troop, troopData, TroopLevel, TroopType } from '../utils/troop';
-import { TroopLevelSelect, TroopInputSlider } from './TroopInput';
+import { TroopLevelSelect, TroopInputSlider, InputManager, InputType } from './TroopInput';
 import { OutputValue, TroopRSSOutputTable } from './TroopOutput';
+import { parseReadableNumber } from './Number';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
@@ -28,6 +29,7 @@ const TroopCalculator: React.FC = () => {
     const [inputValue, setInputValue] = useState<string>('');
     const [troopLevel, setTroopLevel] = useState<TroopLevel>(TroopLevel.T1);
     const [troopTypes, setTroopTypes] = useState<TroopTypes>({ infantry: 34, lancer: 33, marksman: 33 });
+    const [inputType, setInputType] = useState<InputType>(InputType.TroopAmount);
 
     const [outputValue, setOutputValue] = useState<OutputValue>({
         meat: 0,
@@ -35,28 +37,40 @@ const TroopCalculator: React.FC = () => {
         coal: 0,
         iron: 0,
         time: '0d 0h 0m',
+        infantry: 0,
+        lancer: 0,
+        marksman: 0,
     });
 
     useEffect(() => {
         recalculate();
-    }, [inputValue, troopLevel]);
+    }, [inputValue, troopLevel, troopTypes, inputType]);
 
     const handleLevelChange = setTroopLevel;
 
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const amount = parseInt(event.target.value);
-        setInputValue(event.target.value);
-        if (isNaN(amount)) {
-            setOutputValue({ meat: 0, wood: 0, coal: 0, iron: 0, time: '0d 0h 0m' });
-            return;
-        }
-
-    };
+    const handleInputChange = (type: InputType, value: string) => {
+        setInputType(type);
+        setInputValue(value);
+    }
 
     const recalculate = () => {
-        const amount = parseInt(inputValue);
+        let amount: number;
+
+        if (inputType === InputType.TroopAmount) {
+            amount = parseReadableNumber(inputValue);
+        }
+        else {
+            const points = troopData.find(t => t.level === troopLevel && t.type === TroopType.Infantry)?.points;
+            if (!points) {
+                setOutputValue({ meat: 0, wood: 0, coal: 0, iron: 0, time: '0d 0h 0m', infantry: 0, lancer: 0, marksman: 0 });
+                return;
+            }
+
+            amount = Math.ceil(parseReadableNumber(inputValue) / points);
+        }
+
         if (isNaN(amount) || amount <= 0) {
-            setOutputValue({ meat: 0, wood: 0, coal: 0, iron: 0, time: '0d 0h 0m' });
+            setOutputValue({ meat: 0, wood: 0, coal: 0, iron: 0, time: '0d 0h 0m', infantry: 0, lancer: 0, marksman: 0 });
             return;
         }
 
@@ -67,16 +81,35 @@ const TroopCalculator: React.FC = () => {
         ]
 
         if (troopsOpt.some(t => !t)) {
-            setOutputValue({ meat: 0, wood: 0, coal: 0, iron: 0, time: '0d 0h 0m' });
+            setOutputValue({ meat: 0, wood: 0, coal: 0, iron: 0, time: '0d 0h 0m', infantry: 0, lancer: 0, marksman: 0 });
             return;
         }
         const troops = troopsOpt as Troop[];
+        const troopAmounts = [0, 0, 0];
 
-        const troopAmounts = [
-            Math.ceil(amount * troopTypes.infantry / 100),
-            Math.ceil(amount * troopTypes.lancer / 100),
-            Math.ceil(amount * troopTypes.marksman / 100),
-        ];
+        {
+            const getTroopAmount = (type: TroopType) => {
+                switch (type) {
+                    case TroopType.Infantry:
+                        return troopTypes.infantry;
+                    case TroopType.Lancer:
+                        return troopTypes.lancer;
+                    case TroopType.Marksman:
+                        return troopTypes.marksman;
+                }
+            };
+
+            let remaining = amount;
+            for (let i = 0; i < troops.length; i++) {
+                if (i === troops.length - 1) {
+                    troopAmounts[i] = remaining;
+                    break;
+                }
+
+                troopAmounts[i] = Math.min(Math.ceil(amount * getTroopAmount(troops[i].type) / 100), remaining);
+                remaining -= troopAmounts[i];
+            }
+        }
 
         const troop = troops.reduce((acc, troop, i) => {
             acc.cost.meat += troop.cost.meat * troopAmounts[i];
@@ -99,23 +132,17 @@ const TroopCalculator: React.FC = () => {
             coal: troop.cost.coal,
             iron: troop.cost.iron,
             time: timeString,
+            infantry: troopAmounts[0],
+            lancer: troopAmounts[1],
+            marksman: troopAmounts[2],
         });
     }
+
     return (
         <div className="space-y-4">
-            <div className="flex flex-col">
-                <label htmlFor="troop-input" className="mb-2 font-medium">Troop Input:</label>
-                <input
-                    id="troop-input"
-                    type="number"
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    className="p-2 border rounded bg-black"
-                    placeholder="Enter number of troops to train"
-                />
-            </div>
+            <InputManager type={inputType} value={inputValue} onChange={handleInputChange} />
             <TroopLevelSelect label="Troop Level" value={troopLevel} onChange={handleLevelChange} />
-            <div className="flex justify-center">
+            <div className="flex justify-center flex-col lg:flex-row">
                 <TroopInputSlider label="Infantry" value={troopTypes.infantry} max={100 - troopTypes.lancer - troopTypes.marksman} onChange={value => setTroopTypes({ ...troopTypes, infantry: value })} />
                 <TroopInputSlider label="Lancer" value={troopTypes.lancer} max={100 - troopTypes.infantry - troopTypes.marksman} onChange={value => setTroopTypes({ ...troopTypes, lancer: value })} />
                 <TroopInputSlider label="Marksman" value={troopTypes.marksman} max={100 - troopTypes.infantry - troopTypes.lancer} onChange={value => setTroopTypes({ ...troopTypes, marksman: value })} />

@@ -8,6 +8,9 @@ interface OutputValue {
     coal: number;
     iron: number;
     time: string;
+    infantry: number;
+    lancer: number;
+    marksman: number;
 };
 
 interface TroopOutputProps {
@@ -38,6 +41,18 @@ const TroopRSSOutputTable: React.FC<TroopOutputProps> = ({ value }) => {
                 <div className="flex justify-between">
                     <span>Time:</span>
                     <span>{value.time}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span>Infantry:</span>
+                    <ReadableNumber value={value.infantry} />
+                </div>
+                <div className="flex justify-between">
+                    <span>Lancer:</span>
+                    <ReadableNumber value={value.lancer} />
+                </div>
+                <div className="flex justify-between">
+                    <span>Marksman:</span>
+                    <ReadableNumber value={value.marksman} />
                 </div>
             </div>
         </div>
