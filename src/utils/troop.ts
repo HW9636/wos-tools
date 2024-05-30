@@ -308,9 +308,9 @@ class Calculator {
 
     public toOutput(): OutputValue {
         const time = this.output.time;
-        const minutes = time % 60;
-        const hours = Math.floor(time / 60) % 24;
-        const days = Math.floor(time / 1440);
+        const minutes = Math.ceil(time / 60) % 60;
+        const hours = Math.floor(time / 3600) % 24;
+        const days = Math.floor(time / 86400);
         const timeStr = `${days}d ${hours}h ${minutes}m`;
 
         return {
