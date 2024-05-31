@@ -109,7 +109,7 @@ const TroopLevelManager: React.FC<TroopLevelManagerProps> = ({ info, onChange })
                 <div className="upgrade-levels">
                     <h2 className="text-xl">Upgrade Levels:</h2>
                     {info.upgradeLevel.map((upgrade, index) => (
-                        <div key={index} className="upgrade-item bg-gray-800 rounded">
+                        <div key={index} className="upgrade-item bg-gray-800 rounded p-2">
                             <span className="cursor-pointer justify-self-start font-bold text-red-600 p-2" onClick={() => removeUpgrade(index)}>Remove</span>
                             <div /> {/* Spacer */}
                             <label htmlFor="upgrade-from" className="font-medium text-center content-center">Upgrade From:</label>
