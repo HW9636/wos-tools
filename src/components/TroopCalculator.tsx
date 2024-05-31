@@ -74,7 +74,7 @@ const TroopCalculator: React.FC = () => {
             }
             <div className="flex justify-center flex-col">
                 <label className="text-lg font-semibold">Training Speed Bonus:</label>
-                <input type="text" className="p-2 border rounded bg-black" value={trainingSpeed} onChange={handleTrainingSpeedChange} />
+                <input type="text" className="p-2 border rounded dark:bg-black" value={trainingSpeed} onChange={handleTrainingSpeedChange} />
             </div>
 
             <TroopRSSOutputTable value={outputValue} />

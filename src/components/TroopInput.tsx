@@ -20,7 +20,7 @@ interface TroopInputProps {
 const TroopLevelSelect: React.FC<TroopLevelProps> = ({ label, value, onChange, className }) => {
     return (<div className={`troop-level-select ${className}`}>
         {label && <label htmlFor="troop-type" className="mb-2 font-medium">{label}</label>}
-        <select value={value} onChange={e => onChange(e.target.value as TroopLevel)} className="p-2 border rounded bg-black">
+        <select value={value} onChange={e => onChange(e.target.value as TroopLevel)} className="p-2 border rounded dark:bg-black">
             <option value={TroopLevel.T1}>Tier 1</option>
             <option value={TroopLevel.T2}>Tier 2</option>
             <option value={TroopLevel.T3}>Tier 3</option>
@@ -109,7 +109,7 @@ const TroopLevelManager: React.FC<TroopLevelManagerProps> = ({ info, onChange })
                 <div className="upgrade-levels">
                     <h2 className="text-xl">Upgrade Levels:</h2>
                     {info.upgradeLevel.map((upgrade, index) => (
-                        <div key={index} className="upgrade-item bg-gray-800 rounded p-2">
+                        <div key={index} className="upgrade-item bg-gray-300 dark:bg-gray-800 rounded p-2">
                             <span className="cursor-pointer justify-self-start font-bold text-red-600 p-2" onClick={() => removeUpgrade(index)}>Remove</span>
                             <div /> {/* Spacer */}
                             <label htmlFor="upgrade-from" className="font-medium text-center content-center">Upgrade From:</label>
@@ -123,21 +123,21 @@ const TroopLevelManager: React.FC<TroopLevelManagerProps> = ({ info, onChange })
                             <label htmlFor="upgrade-max" className="font-medium text-center content-center">Infantry:</label>
                             <input
                                 type="text"
-                                className="p-2 border rounded bg-black"
+                                className="p-2 border rounded dark:bg-black"
                                 value={upgrade.maxInfantry}
                                 onChange={e => handleUpgradeLevelChangeInfantry(index, e.target.value)}
                             />
                             <label htmlFor="upgrade-max" className="font-medium text-center content-center">Lancer:</label>
                             <input
                                 type="text"
-                                className="p-2 border rounded bg-black"
+                                className="p-2 border rounded dark:bg-black"
                                 value={upgrade.maxLancer}
                                 onChange={e => handleUpgradeLevelChangeLancer(index, e.target.value)}
                             />
                             <label htmlFor="upgrade-max" className="font-medium text-center content-center">Marksman:</label>
                             <input
                                 type="text"
-                                className="p-2 border rounded bg-black"
+                                className="p-2 border rounded dark:bg-black"
                                 value={upgrade.maxMarksman}
                                 onChange={e => handleUpgradeLevelChangeMarksman(index, e.target.value)}
                             />
@@ -145,7 +145,7 @@ const TroopLevelManager: React.FC<TroopLevelManagerProps> = ({ info, onChange })
                     ))}
                 </div>
             }
-            <button onClick={addUpgrade} className="p-2 mt-4 border rounded bg-black">Add Upgrade</button>
+            <button onClick={addUpgrade} className="p-2 mt-4 border rounded dark:bg-black">Add Upgrade</button>
         </div>)
 }
 
@@ -188,7 +188,7 @@ const InputManager: React.FC<InputManagerProps> = ({ type, value, onChange }) =>
     return (
         <div className="flex flex-col">
             <label htmlFor="input-type" className="mb-2 font-medium">Input Type:</label>
-            <select value={type} onChange={e => onChange(e.target.value as InputType, value)} className="p-2 border rounded bg-black">
+            <select value={type} onChange={e => onChange(e.target.value as InputType, value)} className="p-2 border rounded dark:bg-black">
                 <option value={InputType.TroopAmount}>Troop Amount</option>
                 <option value={InputType.HoCPoints}>HoC Points</option>
                 <option value={InputType.UpgradeAll}>Upgrade All</option>
@@ -203,7 +203,7 @@ const InputManager: React.FC<InputManagerProps> = ({ type, value, onChange }) =>
                     type="text"
                     value={value}
                     onChange={e => onChange(type, e.target.value)}
-                    className="p-2 border rounded bg-black"
+                    className="p-2 border rounded dark:bg-black"
                     placeholder={"Enter value, example: " + inputLabels()[1]}
                 />
             }
