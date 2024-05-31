@@ -110,7 +110,7 @@ const TroopLevelManager: React.FC<TroopLevelManagerProps> = ({ info, onChange })
                     <h2 className="text-xl">Upgrade Levels:</h2>
                     {info.upgradeLevel.map((upgrade, index) => (
                         <div key={index} className="upgrade-item bg-gray-300 dark:bg-gray-800 rounded p-2">
-                            <span className="cursor-pointer justify-self-start font-bold text-red-600 p-2" onClick={() => removeUpgrade(index)}>Remove</span>
+                            <span className="cursor-pointer justify-self-start font-bold bg-red-600 p-2 text-white rounded" onClick={() => removeUpgrade(index)}>Remove</span>
                             <div /> {/* Spacer */}
                             <label htmlFor="upgrade-from" className="font-medium text-center content-center">Upgrade From:</label>
                             <TroopLevelSelect
@@ -123,21 +123,21 @@ const TroopLevelManager: React.FC<TroopLevelManagerProps> = ({ info, onChange })
                             <label htmlFor="upgrade-max" className="font-medium text-center content-center">Infantry:</label>
                             <input
                                 type="text"
-                                className="p-2 border rounded dark:bg-black"
+                                className="p-2 border rounded dark:bg-black xs:w-full"
                                 value={upgrade.maxInfantry}
                                 onChange={e => handleUpgradeLevelChangeInfantry(index, e.target.value)}
                             />
                             <label htmlFor="upgrade-max" className="font-medium text-center content-center">Lancer:</label>
                             <input
                                 type="text"
-                                className="p-2 border rounded dark:bg-black"
+                                className="p-2 border rounded dark:bg-black xs:w-full"
                                 value={upgrade.maxLancer}
                                 onChange={e => handleUpgradeLevelChangeLancer(index, e.target.value)}
                             />
                             <label htmlFor="upgrade-max" className="font-medium text-center content-center">Marksman:</label>
                             <input
                                 type="text"
-                                className="p-2 border rounded dark:bg-black"
+                                className="p-2 border rounded dark:bg-black xs:w-full"
                                 value={upgrade.maxMarksman}
                                 onChange={e => handleUpgradeLevelChangeMarksman(index, e.target.value)}
                             />
@@ -145,7 +145,7 @@ const TroopLevelManager: React.FC<TroopLevelManagerProps> = ({ info, onChange })
                     ))}
                 </div>
             }
-            <button onClick={addUpgrade} className="p-2 mt-4 border rounded dark:bg-black">Add Upgrade</button>
+            <button onClick={addUpgrade} className="p-2 mt-4 border rounded bg-gray-400 dark:bg-black">Add Upgrade</button>
         </div>)
 }
 
