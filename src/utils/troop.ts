@@ -325,5 +325,5 @@ class Calculator {
     }
 }
 
-export { TroopLevel, TroopType, troopData, calculateTroopDifference, getTroopsForLevel, Calculator as TroopCalculatorHelper };
+export { TroopLevel, TroopType, troopData, calculateTroopDifference, getTroopsForLevel, Calculator as TroopCalculatorHelper, convertTimeToString };
 export type { Troop, TroopCost, TroopData, TroopRatios };

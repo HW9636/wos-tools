@@ -29,10 +29,11 @@ const TroopCalculator: React.FC = () => {
         const upgradeLevels = inputInfo.upgradeLevel.map(upgrade => ({ ...upgrade }));
         let speed = 0;
         if (trainingSpeed.endsWith('%'))
-            speed = parseFloat(trainingSpeed.slice(0, -1)) / 100;
+            speed = parseFloat(trainingSpeed.slice(0, -1))
         else
             speed = parseFloat(trainingSpeed);
         if (isNaN(speed)) speed = 0;
+        speed = speed / 100;
 
         const calculator = new TroopCalculatorHelper(inputInfo.troopLevel, speed, upgradeLevels)
         switch (inputType) {
