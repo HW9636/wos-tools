@@ -51,6 +51,9 @@ const toLabel = (key: string) => {
 }
 
 const BuildingInputManager: React.FC<BuildingInputManagerProps> = ({ initialLevels, targetLevels, onInitialLevelsChange, onTargetLevelsChange }) => {
+    const [initialAll, setInitialAll] = React.useState(1);
+    const [targetAll, setTargetAll] = React.useState(30);
+
     // Loop through the keys of BuildingLevels
     return (
         <div className="flex flex-col pt-2">
@@ -60,7 +63,7 @@ const BuildingInputManager: React.FC<BuildingInputManagerProps> = ({ initialLeve
                     const level = initialLevels[key as keyof BuildingLevels];
                         return <BuildingLevelSelect key={key} label={toLabel(key)} hasFC={key !== 'researchCenter'} level={level} onChange={(level) => onInitialLevelsChange({ ...initialLevels, [key]: level })} />
                 })}
-                <BuildingLevelSelect label="All" level={1} onChange={(level) => onInitialLevelsChange({ furnace: level, embassy: level, researchCenter: Math.min(30, level), infantryCamp: level, lancerCamp: level, marksmanCamp: level, infirmary: level, commandCenter: level })} />
+                <BuildingLevelSelect label="All" level={initialAll} onChange={(level) => { onInitialLevelsChange({ furnace: level, embassy: level, researchCenter: Math.min(30, level), infantryCamp: level, lancerCamp: level, marksmanCamp: level, infirmary: level, commandCenter: level }); setInitialAll(level);}} />
             </div>
 
             <div className="flex flex-col pt-2">
@@ -69,7 +72,7 @@ const BuildingInputManager: React.FC<BuildingInputManagerProps> = ({ initialLeve
                     const level = targetLevels[key as keyof BuildingLevels];
                     return <BuildingLevelSelect key={key} label={toLabel(key)} hasFC={key !== 'researchCenter'} level={level} onChange={(level) => onTargetLevelsChange({ ...targetLevels, [key]: level })} />
                 })}
-                <BuildingLevelSelect label="All" level={30} onChange={(level) => onTargetLevelsChange({ furnace: level, embassy: level, researchCenter: Math.min(30, level), infantryCamp: level, lancerCamp: level, marksmanCamp: level, infirmary: level, commandCenter: level })} />
+                <BuildingLevelSelect label="All" level={targetAll} onChange={(level) => {onTargetLevelsChange({ furnace: level, embassy: level, researchCenter: Math.min(30, level), infantryCamp: level, lancerCamp: level, marksmanCamp: level, infirmary: level, commandCenter: level }); setTargetAll(level);}} />
             </div>
         </div>
     );
