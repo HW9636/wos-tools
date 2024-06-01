@@ -5,8 +5,8 @@ import "../../globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Whiteout Survival Tools | Building Calculator",
-    description: "A tool to help you calculate the resources needed to upgrade your buildings in the game Whiteout.",
+    title: "Whiteout Survival Tools | Troop Calculator",
+    description: "Troop calculator for Whiteout Survival. Calculate the resources and time needed to train troops.",
 };
 
 export default function RootLayout({
