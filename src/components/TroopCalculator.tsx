@@ -20,6 +20,7 @@ const TroopCalculator: React.FC = () => {
         iron: 0,
         rawTime: '0d 0h 0m',
         time: '0d 0h 0m',
+        power: 0,
         infantry: 0,
         lancer: 0,
         marksman: 0,

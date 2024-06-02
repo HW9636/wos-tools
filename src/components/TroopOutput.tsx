@@ -3,6 +3,7 @@ import React from 'react';
 import { ReadableNumber } from './Number';
 import { Pie } from 'react-chartjs-2';
 import "../utils/chartConfig";
+import { TroopLevel, getTroopPower } from '../utils/troop';
 
 interface OutputValue {
     meat: number;
@@ -11,6 +12,7 @@ interface OutputValue {
     iron: number;
     rawTime: string;
     time: string;
+    power: number;
     infantry: number;
     lancer: number;
     marksman: number;
@@ -60,6 +62,10 @@ const TroopRSSOutputTable: React.FC<TroopOutputProps> = ({ value }) => {
                 <div className="flex justify-between">
                     <span>Marksman:</span>
                     <ReadableNumber value={value.marksman} />
+                </div>
+                <div className="flex justify-between">
+                    <span>Power:</span>
+                    <ReadableNumber value={value.power} />
                 </div>
             </div>
         </div>

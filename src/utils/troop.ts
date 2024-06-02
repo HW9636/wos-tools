@@ -129,6 +129,7 @@ type CalculatorOutputStore = {
     coal: number;
     iron: number;
     time: number;
+    power: number;
     infantry: number;
     lancer: number;
     marksman: number;
@@ -138,7 +139,7 @@ class Calculator {
     private targetTroops: Troop[];
     private upgrades: TroopUpgrade[];
     private trainingSpeed: number;
-    private output: CalculatorOutputStore = { meat: 0, wood: 0, coal: 0, iron: 0, time: 0, infantry: 0, lancer: 0, marksman: 0 };
+    private output: CalculatorOutputStore = { meat: 0, wood: 0, coal: 0, iron: 0, time: 0, power: 0, infantry: 0, lancer: 0, marksman: 0 };
 
     public constructor(targetLevel: TroopLevel, trainingSpeed: number, upgrades: TroopUpgrade[]) {
         this.targetTroops = getTroopsForLevel(targetLevel);
@@ -225,7 +226,7 @@ class Calculator {
         this.output.infantry += amounts[0];
         this.output.lancer += amounts[1];
         this.output.marksman += amounts[2];
-
+        this.output.power += getTroopPower(this.targetTroops[0].level) * amounts[0] + getTroopPower(this.targetTroops[1].level) * amounts[1] + getTroopPower(this.targetTroops[2].level) * amounts[2];
     }
 
     public TargetAmount(amount: number, ratios: TroopRatios): boolean {
@@ -247,6 +248,7 @@ class Calculator {
             this.output.infantry += index === 0 ? amt : 0;
             this.output.lancer += index === 1 ? amt : 0;
             this.output.marksman += index === 2 ? amt : 0;
+            this.output.power += (getTroopPower(this.targetTroops[index].level) - getTroopPower(troop.level)) * amt;
 
             return { acc, remaining: troopAmount - amt };
         });
@@ -288,6 +290,7 @@ class Calculator {
             this.output.infantry += index === 0 ? amt : 0;
             this.output.lancer += index === 1 ? amt : 0;
             this.output.marksman += index === 2 ? amt : 0;
+            this.output.power += (getTroopPower(this.targetTroops[index].level) - getTroopPower(troop.level)) * amt;
 
             return { acc, remaining: troopAmount - amt };
         });
@@ -310,7 +313,6 @@ class Calculator {
     };
 
     public toOutput(): OutputValue {
-
         return {
             meat: this.output.meat,
             wood: this.output.wood,
@@ -318,6 +320,7 @@ class Calculator {
             iron: this.output.iron,
             rawTime: convertTimeToString(this.output.time),
             time: convertTimeToString(this.output.time / (1 + this.trainingSpeed)),
+            power: this.output.power,
             infantry: this.output.infantry,
             lancer: this.output.lancer,
             marksman: this.output.marksman,
@@ -325,5 +328,30 @@ class Calculator {
     }
 }
 
-export { TroopLevel, TroopType, troopData, calculateTroopDifference, getTroopsForLevel, Calculator as TroopCalculatorHelper, convertTimeToString };
+const getTroopPower = (level: TroopLevel): number => {
+    switch (level) {
+        case TroopLevel.T1:
+            return 3;
+        case TroopLevel.T2:
+            return 4;
+        case TroopLevel.T3:
+            return 6;
+        case TroopLevel.T4:
+            return 9;
+        case TroopLevel.T5:
+            return 13;
+        case TroopLevel.T6:
+            return 20;
+        case TroopLevel.T7:
+            return 28;
+        case TroopLevel.T8:
+            return 38;
+        case TroopLevel.T9:
+            return 50;
+        case TroopLevel.T10:
+            return 66;
+    };
+};
+
+export { TroopLevel, TroopType, troopData, calculateTroopDifference, getTroopsForLevel, Calculator as TroopCalculatorHelper, convertTimeToString, getTroopPower};
 export type { Troop, TroopCost, TroopData, TroopRatios };
